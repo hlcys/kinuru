@@ -1,14 +1,7 @@
-# Kinuru Blog
+# Own Blog
 
-这是一个基于 [Frosti](https://github.com/EveSunMaple/Frosti) 改造的 Astro 静态博客，用来记录 LLM、C/C++、AI infra、Agent、课题研究与日常思考。
+这是一个基于 [Frosti](https://github.com/EveSunMaple/Frosti) 改造的 Astro 静态博客，用来记录自己学习与日常的思考。
 
-当前项目已经整理到 `blog` 根目录下，正常开发路径是：
-
-```txt
-C:\Users\oix25\Desktop\kinuru\blog
-```
-
-旧的 `blog/blog` 路径不再作为项目入口使用。
 
 ## 技术栈
 
@@ -61,18 +54,6 @@ src/styles/         全局样式
 public/             静态资源，例如头像、背景图、站点图标
 frosti.config.yaml  站点名称、菜单、头像、社交链接和主题配置
 ```
-
-## 分类规划
-
-当前博客只保留以下分类：
-
-- 杂谈
-- LLM
-- C/C++
-- AI infra
-- Agent
-- 日常
-- 课题研究
 
 ## 常见修改位置
 
