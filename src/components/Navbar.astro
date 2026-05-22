@@ -1,0 +1,148 @@
+---
+import { Icon } from "astro-icon/components";
+import { SITE_MENU, SITE_TITLE } from "../config";
+import ThemeToggle from "./widgets/ThemeToggle.astro";
+
+const currentPath = Astro.url.pathname;
+
+type SubMenuItem = {
+  id: string;
+  text: string;
+  href: string;
+  svg: string;
+  target?: string;
+};
+
+type MenuItem = {
+  id: string;
+  text: string;
+  href: string;
+  svg: string;
+  target?: string;
+  subItems?: SubMenuItem[];
+};
+
+const typedMenu = SITE_MENU as MenuItem[];
+---
+
+<nav
+  class="navbar fixed top-0 left-0 z-50 min-h-16 w-full border-b border-base-content/10 bg-base-100/75 px-4 shadow-sm backdrop-blur-xl"
+  id="navbar"
+>
+  <div class="navbar-start gap-2">
+    <label class="btn btn-circle btn-ghost swap swap-rotate md:hidden">
+      <span class="sr-only">切换菜单</span>
+      <input type="checkbox" id="menu-toggle" />
+      <Icon name="lucide:menu" class="swap-off h-5 w-5" />
+      <Icon name="lucide:x" class="swap-on h-5 w-5" />
+    </label>
+
+    <a class="btn btn-ghost gap-2 text-base font-bold md:text-lg" href="/">
+      <Icon name="lucide:sparkles" class="h-5 w-5 text-primary" />
+      <span>{SITE_TITLE}</span>
+    </a>
+  </div>
+
+  <div class="navbar-center hidden md:flex">
+    <ul class="menu menu-horizontal gap-1 px-1">
+      {
+        typedMenu.map((item) => (
+          <li>
+            {item.subItems ? (
+              <details>
+                <summary class="font-medium">
+                  <Icon name={item.svg} class="h-4 w-4" />
+                  {item.text}
+                </summary>
+                <ul class="rounded-xl bg-base-100 p-2 shadow-lg">
+                  {item.subItems.map((subItem) => (
+                    <li>
+                      <a href={subItem.href} target={subItem.target || "_self"}>
+                        <Icon name={subItem.svg} class="h-4 w-4" />
+                        {subItem.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : (
+              <a
+                class:list={[
+                  "font-medium",
+                  (currentPath === item.href || (item.href !== "/" && currentPath.startsWith(item.href))) &&
+                    "bg-base-200 text-primary",
+                ]}
+                href={item.href}
+                target={item.target || "_self"}
+              >
+                <Icon name={item.svg} class="h-4 w-4" />
+                {item.text}
+              </a>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="navbar-end gap-2">
+    <a href="/blog/search" class="btn btn-ghost hidden gap-2 rounded-xl sm:flex" aria-label="搜索">
+      <Icon name="lucide:search" class="h-4 w-4" />
+      <span class="hidden lg:inline">搜索</span>
+    </a>
+    <ThemeToggle className="navbar-theme" />
+  </div>
+
+  <div
+    id="header-menu"
+    class="absolute left-0 top-full w-full -translate-y-2 scale-95 bg-base-100/95 p-3 opacity-0 shadow-lg backdrop-blur-xl transition duration-200 pointer-events-none md:hidden"
+  >
+    <ul class="menu w-full gap-1 bg-transparent p-0">
+      {
+        typedMenu.map((item) => (
+          <li>
+            <a
+              class:list={[
+                "rounded-xl text-base font-bold",
+                currentPath === item.href && "bg-base-200 text-primary",
+              ]}
+              href={item.href}
+              target={item.target || "_self"}
+            >
+              <Icon name={item.svg} class="h-5 w-5" />
+              {item.text}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</nav>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const headerMenu = document.getElementById("header-menu");
+    const menuToggle = document.getElementById("menu-toggle") as HTMLInputElement | null;
+
+    if (!headerMenu || !menuToggle) return;
+
+    const closeMenu = () => {
+      menuToggle.checked = false;
+      headerMenu.classList.add("pointer-events-none", "scale-95", "-translate-y-2", "opacity-0");
+      headerMenu.classList.remove("scale-100", "translate-y-0", "opacity-100");
+    };
+
+    menuToggle.addEventListener("change", () => {
+      if (menuToggle.checked) {
+        headerMenu.classList.remove("pointer-events-none", "scale-95", "-translate-y-2", "opacity-0");
+        headerMenu.classList.add("scale-100", "translate-y-0", "opacity-100");
+      } else {
+        closeMenu();
+      }
+    });
+
+    document.querySelectorAll("#header-menu a").forEach((item) => {
+      item.addEventListener("click", closeMenu);
+    });
+  });
+</script>

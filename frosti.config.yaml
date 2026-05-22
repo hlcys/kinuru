@@ -1,0 +1,50 @@
+# 网站的基本信息
+site:
+  tab: Kinuru Blog # 浏览器标签栏上显示的文本
+  title: Kinuru Blog # 网站标题
+  description: 记录 LLM、C/C++、AI infra、Agent、课题研究与日常思考的个人博客。 # 用于 SEO 的站点描述
+  language: zh # 网站语言
+  favicon: /favicon.ico # 网站图标
+  theme: # 更多主题 https://daisyui.com/docs/themes/
+    light: winter
+    dark: dracula
+    code: github-dark
+  date_format: YYYY-MM-DD
+  blog:
+    pageSize: 8
+  menu:
+    - id: home
+      text: 主页
+      href: /
+      svg: "lucide:house"
+      target: _self
+    - id: blog
+      text: 文章
+      href: /blog
+      svg: "lucide:file-text"
+      target: _self
+    - id: categories
+      text: 分类
+      href: /blog/categories
+      svg: "lucide:folder"
+      target: _self
+    - id: archives
+      text: 归档
+      href: /blog/archives
+      svg: "lucide:archive"
+      target: _self
+    - id: tags
+      text: 标签
+      href: /blog/tags
+      svg: "lucide:tags"
+      target: _self
+
+# 用户的个人信息
+user:
+  name: Kinuru
+  site: "http://localhost:4321"
+  avatar: /avatar.png
+  sidebar:
+    social: []
+  footer:
+    social: []

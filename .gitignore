@@ -1,6 +1,5 @@
 # build output
 dist/
-
 # generated types
 .astro/
 
@@ -13,6 +12,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+
 # environment variables
 .env
 .env.production
@@ -22,3 +22,14 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# pagefind
+public/pagefind/
+
+# local migration artifacts
+.frosti-template/
+.codex-backup-pre-frosti-*/
+astro-live.*.log
+astro-preview.*.log
+frosti-preview.*.log
+preview.*.log

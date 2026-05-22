@@ -1,0 +1,18 @@
+---
+import { USER_NAME } from "@config";
+import { Icon } from "astro-icon/components";
+---
+
+<footer class="footer bg-base-100 p-8 rounded-xl shadow-lg items-center">
+  <aside class="grid-flow-col items-center">
+    <Icon name="lucide:sparkles" class="w-8 h-8 text-primary" />
+    <p>
+      版权所有 © {USER_NAME} {new Date().getFullYear()} - 保留所有权利
+    </p>
+  </aside>
+  <nav class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
+    <a tabindex="0" href="/rss.xml" aria-label="RSS 订阅" class="btn btn-circle btn-ghost">
+      <Icon name="ri:rss-line" class="text-xl" />
+    </a>
+  </nav>
+</footer>

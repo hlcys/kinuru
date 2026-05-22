@@ -1,20 +1,179 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { DATE_FORMAT, SITE_DESCRIPTION, SITE_TITLE, USER_AVATAR, USER_NAME } from "@config";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import {
+  getAllPosts,
+  getCategoriesWithPosts,
+  getPostsWithStats,
+  getTagsWithCount,
+  sortPostsByPinAndDate,
+} from "@utils/blogUtils";
+import dayjs from "@utils/dayjs";
+import { PLANNED_CATEGORIES } from "@utils/taxonomy";
+import { Icon } from "astro-icon/components";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const rawPosts = sortPostsByPinAndDate(await getAllPosts());
+const posts = await getPostsWithStats(rawPosts);
+const categoryMap = getCategoriesWithPosts(rawPosts);
+const tagMap = getTagsWithCount(rawPosts);
+
+const categoryRows = PLANNED_CATEGORIES.map((category) => ({
+  ...category,
+  count: categoryMap.get(category.name)?.length || 0,
+}));
+
+const totalWords = posts.reduce((sum, post) => {
+  const count = Number(post.remarkPluginFrontmatter?.totalCharCount || 0);
+  return sum + count;
+}, 0);
+
+const latestDate = rawPosts[0]?.data.pubDate ? dayjs(rawPosts[0].data.pubDate).format(DATE_FORMAT) : "暂无";
 ---
 
-<html lang="zh-cn">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type ="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content = {Astro.generator} >
-    <title>Astro</title>
-  </head>
-  <body>
-    <h1>Astro</h1>
-  </body>
-</html>
+<BaseLayout title="首页" showSidebar={false} fullWidth={true} showFooter={false}>
+  <section
+    class="relative min-h-[560px] overflow-hidden bg-cover bg-center pt-24"
+    style="background-image: linear-gradient(180deg, rgba(20, 27, 42, 0.32), rgba(20, 27, 42, 0.42)), url('/home-bg.png');"
+  >
+    <div class="absolute inset-0 bg-base-100/10 backdrop-blur-[1px]"></div>
+    <div class="relative z-10 mx-auto flex min-h-[460px] max-w-7xl flex-col items-center justify-center px-4 text-center text-white">
+      <p class="mb-4 text-lg font-medium opacity-90">How long can you stand?</p>
+      <h1 class="text-5xl font-black tracking-normal drop-shadow-lg md:text-7xl">{SITE_TITLE}</h1>
+      <p class="mt-5 text-xl font-semibold text-white/90">梦里寻路，飞雨落花</p>
+    </div>
+  </section>
+
+  <section class="relative z-20 mx-auto -mt-16 grid max-w-7xl grid-cols-1 gap-6 px-4 pb-12 lg:grid-cols-[280px_minmax(0,1fr)_280px]">
+    <aside class="space-y-6">
+      <div class="rounded-2xl bg-base-100 p-5 shadow-lg">
+        <img src={USER_AVATAR} alt={USER_NAME} class="aspect-square w-full rounded-xl object-cover" />
+        <div class="pt-4 text-center">
+          <h2 class="text-xl font-black">{USER_NAME}</h2>
+          <div class="mx-auto my-3 h-1 w-8 rounded-full bg-primary"></div>
+          <p class="text-sm text-base-content/65">{SITE_DESCRIPTION}</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-base-100 p-5 shadow-lg">
+        <h2 class="mb-4 flex items-center gap-2 text-lg font-black">
+          <span class="h-5 w-1 rounded-full bg-primary"></span>
+          分类
+        </h2>
+        <div class="space-y-2">
+          {
+            categoryRows.map((category) => (
+              <a
+                href={category.count > 0 ? `/blog/category/${category.slug}` : "/blog/categories"}
+                class="flex items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-primary/10"
+              >
+                <span class="flex items-center gap-2">
+                  <Icon name={category.icon} class="h-4 w-4 text-primary" />
+                  {category.name}
+                </span>
+                <span class="rounded-lg bg-primary/10 px-2 py-1 text-xs font-bold text-primary">{category.count}</span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </aside>
+
+    <main class="space-y-5">
+      {
+        posts.map((post) => {
+          const primaryCategory = post.data.categories?.[0] || "杂谈";
+          const postDate = dayjs(post.data.pubDate).format(DATE_FORMAT);
+
+          return (
+            <article class="group grid grid-cols-[1fr_52px] overflow-hidden rounded-2xl bg-base-100 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+              <a href={`/blog/${post.slug}`} class="p-5 md:p-7">
+                <div class="mb-3 flex flex-wrap items-center gap-3 text-sm text-base-content/60">
+                  {post.data.badge && (
+                    <span class="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2.5 py-1 font-bold text-primary">
+                      <Icon name="lucide:pin" class="h-4 w-4" />
+                      置顶
+                    </span>
+                  )}
+                  <span class="inline-flex items-center gap-1 rounded-lg bg-base-200 px-2.5 py-1">
+                    <Icon name="lucide:calendar" class="h-4 w-4 text-primary" />
+                    {postDate}
+                  </span>
+                  <span class="inline-flex items-center gap-1 rounded-lg bg-base-200 px-2.5 py-1">
+                    <Icon name="lucide:folder" class="h-4 w-4 text-primary" />
+                    {primaryCategory}
+                  </span>
+                </div>
+
+                <h2 class="mb-3 border-l-4 border-primary pl-4 text-2xl font-black leading-snug text-base-content">
+                  {post.data.title}
+                </h2>
+                <p class="line-clamp-2 text-base leading-7 text-base-content/70">{post.data.description}</p>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {(post.data.tags || []).slice(0, 4).map((tag: string) => (
+                    <span class="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">#{tag}</span>
+                  ))}
+                </div>
+              </a>
+              <a
+                href={`/blog/${post.slug}`}
+                aria-label={`阅读 ${post.data.title}`}
+                class="flex items-center justify-center bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-content"
+              >
+                <Icon name="lucide:chevron-right" class="h-7 w-7" />
+              </a>
+            </article>
+          );
+        })
+      }
+    </main>
+
+    <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div class="rounded-2xl bg-base-100 p-5 shadow-lg">
+        <h2 class="mb-4 flex items-center gap-2 text-lg font-black">
+          <span class="h-5 w-1 rounded-full bg-primary"></span>
+          站点统计
+        </h2>
+        <div class="space-y-4 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-base-content/70"><Icon name="lucide:file-text" class="h-4 w-4 text-primary" />文章</span>
+            <strong>{posts.length}</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-base-content/70"><Icon name="lucide:folder" class="h-4 w-4 text-primary" />分类</span>
+            <strong>{categoryRows.length}</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-base-content/70"><Icon name="lucide:tags" class="h-4 w-4 text-primary" />标签</span>
+            <strong>{tagMap.size}</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-base-content/70"><Icon name="lucide:book-open" class="h-4 w-4 text-primary" />总字数</span>
+            <strong>{totalWords.toLocaleString("zh-CN")}</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2 text-base-content/70"><Icon name="lucide:activity" class="h-4 w-4 text-primary" />最近更新</span>
+            <strong>{latestDate}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-base-100 p-5 shadow-lg">
+        <h2 class="mb-4 flex items-center gap-2 text-lg font-black">
+          <span class="h-5 w-1 rounded-full bg-primary"></span>
+          近期文章
+        </h2>
+        <div class="space-y-3">
+          {
+            posts.slice(0, 5).map((post) => (
+              <a href={`/blog/${post.slug}`} class="block rounded-xl p-3 transition hover:bg-primary/10">
+                <span class="line-clamp-1 text-sm font-bold">{post.data.title}</span>
+                <span class="mt-1 block text-xs text-base-content/55">{dayjs(post.data.pubDate).format(DATE_FORMAT)}</span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </aside>
+  </section>
+</BaseLayout>
